@@ -150,7 +150,9 @@
     </Compile>
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\CartItem.cs" />
+    <Compile Include="Models\CheckoutViewModel.cs" />
     <Compile Include="Models\DanhMucViewModel.cs" />
+    <Compile Include="Models\HoaDonDto.cs" />
     <Compile Include="Models\SanPhamViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -277,6 +279,7 @@
     <Content Include="Views\SanPham\Detail.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
     <Content Include="Views\Cart\_ShoppingCartWidget.cshtml" />
+    <Content Include="Views\Cart\Checkout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

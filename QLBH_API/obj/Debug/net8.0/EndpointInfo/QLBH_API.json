@@ -155,6 +155,37 @@
         }
       }
     },
+    "/api/HoaDon/create": {
+      "post": {
+        "tags": [
+          "HoaDon"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoaDonCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoaDonCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoaDonCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/SanPham": {
       "get": {
         "tags": [
@@ -306,6 +337,53 @@
   },
   "components": {
     "schemas": {
+      "ChiTietHoaDonDto": {
+        "type": "object",
+        "properties": {
+          "maSanPham": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "soLuong": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "donGia": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HoaDonCreateDto": {
+        "type": "object",
+        "properties": {
+          "maKhachHang": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diaChiGiaoHang": {
+            "type": "string",
+            "nullable": true
+          },
+          "ghiChu": {
+            "type": "string",
+            "nullable": true
+          },
+          "tongTien": {
+            "type": "number",
+            "format": "double"
+          },
+          "chiTietDonHang": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChiTietHoaDonDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "tbGioHang": {
         "type": "object",
         "properties": {

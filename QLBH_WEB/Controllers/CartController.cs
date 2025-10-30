@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using QLBH_WEB.Models; // Đảm bảo namespace này là đúng
+using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using QLBH_WEB.Models; // Đảm bảo namespace này là đúng
 
 namespace QLBH_WEB.Controllers
 {
@@ -104,6 +106,103 @@ namespace QLBH_WEB.Controllers
         {
             var cart = Session[CartSession] as Cart ?? new Cart();
             return PartialView("_ShoppingCartWidget", cart);
+        }
+        public ActionResult Checkout()
+        {
+            Cart cart = (Cart)Session["Cart"];
+            if (cart == null || cart.Items.Count == 0)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var model = new CheckoutViewModel
+            {
+                Cart = cart
+            };
+
+            return View(model); // Trả về View Checkout.cshtml
+        }
+
+        // POST: /Cart/SubmitCheckout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> SubmitCheckout(CheckoutViewModel model)
+        {
+            Cart cart = (Cart)Session["Cart"];
+            if (cart == null)
+            {
+                // Xử lý lỗi giỏ hàng trống
+                return RedirectToAction("Index");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Cart = cart;
+                return View("Checkout", model); // Trả lại trang checkout nếu nhập liệu lỗi
+            }
+
+            // 1. Chuẩn bị dữ liệu DTO để gửi
+            var dto = new HoaDonCreateDto
+            {
+                // Cần có logic lấy MaKhachHang (ví dụ: sau khi đăng nhập)
+                // Tạm thời hardcode
+                MaKhachHang = 1,
+                DiaChiGiaoHang = model.DiaChiGiaoHang,
+                GhiChu = model.GhiChu,
+                TongTien = cart.GetTotal(),
+                ChiTietDonHang = new List<ChiTietHoaDonDto>()
+            };
+
+            foreach (var item in cart.Items)
+            {
+                dto.ChiTietDonHang.Add(new ChiTietHoaDonDto
+                {
+                    MaSanPham = item.Value.SanPham.MASANPHAM, // <-- Sửa lại
+                    SoLuong = item.Value.SoLuong,     // <-- Sửa lại
+                    DonGia = item.Value.SanPham.DONGIA ?? 0
+                });
+            }
+
+            // 2. Gọi API để tạo hóa đơn
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri(_apiBaseUrl);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    HttpResponseMessage response = await client.PostAsJsonAsync("api/hoadon/create", dto);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Xóa giỏ hàng khỏi session
+                        Session["Cart"] = null;
+
+                        // Chuyển đến trang cảm ơn
+                        return RedirectToAction("OrderSuccess");
+                    }
+                    else
+                    {
+                        // Xử lý lỗi từ API
+                        ModelState.AddModelError("", "Không thể tạo đơn hàng. Vui lòng thử lại. " + response.ReasonPhrase);
+                        model.Cart = cart;
+                        return View("Checkout", model);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi: " + ex.Message);
+                model.Cart = cart;
+                return View("Checkout", model);
+            }
+        }
+
+        // GET: /Cart/OrderSuccess
+        public ActionResult OrderSuccess()
+        {
+            return Content("Chúc mừng! Bạn đã đặt hàng thành công.");
         }
     }
 }

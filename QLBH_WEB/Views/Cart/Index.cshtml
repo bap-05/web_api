@@ -68,7 +68,7 @@
                 @* Sửa lại: Link quay về trang chủ Home an toàn hơn *@
                 @Html.ActionLink("Quay lại trang chủ", "Index", "Home", null, new { @class = "btn-cart btn-continue" })
                 <button type="submit" class="btn-cart btn-update">Cập nhật</button>
-                <a href="#" class="btn-cart btn-checkout">Thanh toán</a>
+                @Html.ActionLink("Thanh toán", "Checkout", "Cart", null, new { @class = "btn-cart btn-checkout" })
             </div>
         }
     }

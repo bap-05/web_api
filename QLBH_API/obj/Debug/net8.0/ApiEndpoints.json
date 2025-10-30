@@ -95,6 +95,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HoaDonController",
+    "Method": "CreateHoaDon",
+    "RelativePath": "api/HoaDon/create",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "QLBH_API.Models.HoaDonCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "QLBH_API.Controllers.SanPhamController",
     "Method": "GetAll",
     "RelativePath": "api/SanPham",

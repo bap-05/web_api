@@ -39,5 +39,6 @@ namespace QLBH_API.Controllers
             await _gioHangRepo.RemoveFromCartAsync(maKhachHang, maSanPham);
             return Ok();
         }
+
     }
 }
