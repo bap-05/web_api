@@ -1,0 +1,84 @@
+﻿@model  WebAdmin.Models.SanPhamViewModel
+@{
+    ViewBag.Title = "Thêm sản phẩm mới";
+}
+
+@section Styles {
+    <link href="@Url.Content("~/Content/css_main/Create.css")" rel="stylesheet" type="text/css" />
+}
+
+<h2 class="page-title">Thêm sản phẩm mới</h2>
+
+@using (Html.BeginForm("Create", "QuanLySanPham", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-card">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên sản phẩm</label>
+                    @Html.TextBoxFor(m => m.TENSANPHAM, new { @class = "form-control form-control-lg", placeholder = "Nhập tên sản phẩm..." })
+                    @Html.ValidationMessageFor(m => m.TENSANPHAM, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Danh mục</label>
+                        @Html.DropDownListFor(m => m.MADANHMUC, (SelectList)ViewBag.DanhMucList, "-- Chọn danh mục --", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.MADANHMUC, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Đơn giá</label>
+                        @Html.TextBoxFor(m => m.DONGIA, new { @class = "form-control", type = "number", placeholder = "Giá..." })
+                        @Html.ValidationMessageFor(m => m.DONGIA, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Số lượng</label>
+                    @Html.TextBoxFor(m => m.SOLUONG, new { @class = "form-control", type = "number", placeholder = "SL..." })
+                    @Html.ValidationMessageFor(m => m.SOLUONG, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mô tả</label>
+                    @Html.TextAreaFor(m => m.MOTA, new { @class = "form-control", rows = 4, placeholder = "Nhập mô tả sản phẩm..." })
+                </div>
+            </div>
+
+            <div class="col-md-5 text-center">
+                <label class="form-label fw-semibold d-block">Hình ảnh sản phẩm</label>
+                <div class="image-upload-box">
+                    <img id="previewImage" src="@Url.Content("~/Content/images/no-image.png")" alt="Preview" class="img-thumbnail mb-3" />
+                    <input type="file" name="hinhAnhFile" id="hinhAnhFile" class="form-control" accept="image/*" />
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary" })
+            <button type="submit" class="btn btn-success">
+                Lưu
+            </button>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('hinhAnhFile').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            var preview = document.getElementById("previewImage");
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    preview.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '@Url.Content("~/Content/images/no-image.png")';
+            }
+        });
+    </script>
+}

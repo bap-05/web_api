@@ -1,0 +1,20 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "QLBH_API\\QLBH_API.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "QLBH_WEB\\QLBH_WEB.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "WebAdmin\\WebAdmin.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

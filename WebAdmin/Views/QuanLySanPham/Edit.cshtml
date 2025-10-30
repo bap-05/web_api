@@ -1,0 +1,86 @@
+﻿@model WebAdmin.Models.SanPhamViewModel
+
+@{
+    ViewBag.Title = "Chỉnh sửa sản phẩm";
+}
+
+@* Gọi đến file CSS riêng cho trang này *@
+@section Styles {
+    <link href="@Url.Content("~/Content/css_main/EditSanPham.css")" rel="stylesheet" type="text/css" />
+}
+
+<h2 class="page-title">
+    Chỉnh sửa sản phẩm
+</h2>
+
+@using (Html.BeginForm("Edit", "QuanLySanPham", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-card">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+        @Html.HiddenFor(model => model.MASANPHAM)
+        @Html.HiddenFor(model => model.HINHANH)
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.TENSANPHAM, "Tên sản phẩm", htmlAttributes: new { @class = "form-label fw-semibold" })
+                    @Html.TextBoxFor(model => model.TENSANPHAM, new { @class = "form-control form-control-lg", placeholder = "Nhập tên sản phẩm" })
+                    @Html.ValidationMessageFor(model => model.TENSANPHAM, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        @Html.LabelFor(model => model.DONGIA, "Đơn giá", htmlAttributes: new { @class = "form-label fw-semibold" })
+                        @Html.TextBoxFor(model => model.DONGIA, new { @class = "form-control", placeholder = "Nhập đơn giá", type = "number" })
+                        @Html.ValidationMessageFor(model => model.DONGIA, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        @Html.LabelFor(model => model.SOLUONG, "Số lượng", htmlAttributes: new { @class = "form-label fw-semibold" })
+                        @Html.TextBoxFor(model => model.SOLUONG, new { @class = "form-control", placeholder = "Nhập số lượng", type = "number" })
+                        @Html.ValidationMessageFor(model => model.SOLUONG, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.MOTA, "Mô tả", htmlAttributes: new { @class = "form-label fw-semibold" })
+                    @Html.TextAreaFor(model => model.MOTA, new { @class = "form-control", rows = 4, placeholder = "Nhập mô tả sản phẩm" })
+                    @Html.ValidationMessageFor(model => model.MOTA, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="col-md-5 text-center">
+                <label class="form-label fw-semibold d-block">Hình ảnh</label>
+                <div class="border rounded p-3 bg-light">
+                    <img id="previewImage" src="@Url.Content("~/Content/images/" + (Model.HINHANH ?? "no-image.png"))" alt="Ảnh sản phẩm"
+                         class="img-thumbnail mb-3" style="max-width: 100%; max-height: 250px; object-fit: contain;" />
+                    <input type="file" id="hinhAnhFile" name="hinhAnhFile" class="form-control" accept="image/*" />
+                </div>
+                <small class="text-muted fst-italic d-block mt-1">
+                    Chọn ảnh mới nếu muốn thay đổi
+                </small>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn btn-secondary me-2" })
+            <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('hinhAnhFile').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    document.getElementById('previewImage').src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

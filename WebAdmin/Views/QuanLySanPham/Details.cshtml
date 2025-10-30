@@ -1,0 +1,72 @@
+﻿@model WebAdmin.Models.SanPhamViewModel
+
+@{
+    ViewBag.Title = Model.TENSANPHAM;
+}
+
+<h2>@Html.DisplayFor(model => model.TENSANPHAM)</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-5">
+     
+        
+            <img src="@Url.Content("~/Content/images/" + (Model.HINHANH ?? "no-image.png"))" alt="@Model.TENSANPHAM" class="img-fluid rounded shadow-sm" style="max-height: 450px; display: block; margin: auto;" />
+     
+      
+    </div>
+
+    <div class="col-md-7">
+        <h4>Mô tả chi tiết</h4>
+        <div class="product-description p-3 bg-light rounded" style="border: 1px solid #e0e0e0; min-height: 200px;">
+            @Html.Raw(Model.MOTA)
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 20px;">
+   
+    @Html.ActionLink("Quay lại danh sách", "Index", null, new { @class = "btn btn-outline-secondary" })
+</div>
+<style>
+    /* Tiêu đề chính của sản phẩm */
+    h2 {
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    /* Tiêu đề "Mô tả chi tiết" */
+    h4 {
+        color: #34495e;
+        font-weight: 500;
+        margin-bottom: 15px; /* Tạo khoảng cách với nội dung mô tả */
+    }
+
+    /* Ảnh sản phẩm */
+    .product-image {
+        max-height: 450px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid #ddd; /* Thêm viền nhẹ cho ảnh */
+        padding: 4px; /* Khoảng đệm nhỏ bên trong viền */
+    }
+
+    /* Khung chứa mô tả */
+    .product-description {
+        border: 1px solid #e0e0e0;
+        min-height: 200px;
+        line-height: 1.7; /* Giãn dòng cho dễ đọc */
+        font-size: 1.1em;
+        /* Các class p-3, bg-light, rounded đã được Bootstrap hỗ trợ,
+           nhưng bạn có thể ghi đè ở đây nếu muốn */
+        background-color: #fdfdfd;
+    }
+
+    /* Vùng chứa các nút bấm */
+    .action-buttons {
+        margin-top: 25px; /* Khoảng cách so với nội dung bên trên */
+    }
+</style>

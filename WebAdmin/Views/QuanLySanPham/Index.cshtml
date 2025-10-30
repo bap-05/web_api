@@ -1,0 +1,75 @@
+﻿@model IEnumerable<WebAdmin.Models.SanPhamViewModel>
+
+@{
+    ViewBag.Title = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Gọi đến file CSS riêng *@
+@section Styles {
+    <link href="@Url.Content("~/Content/css_main/qlSANPHAM.css")" rel="stylesheet" type="text/css" />
+}
+
+<div class="product-page-wrapper">
+    <div class="page-header">
+        <h2>Quản lý sản phẩm</h2>
+        @Html.ActionLink("Thêm sản phẩm mới", "Create", null, new { @class = "add-button" })
+    </div>
+
+    <div class="search-container">
+        <input id="searchBox" type="text" class="search-input" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterTable()" />
+    </div>
+
+    <table id="productTable" class="product-table">
+        <thead>
+            <tr>
+                <th>Mã SP</th>
+                <th>Tên sản phẩm</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Hình ảnh</th>
+                <th style="width: 150px;">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="product-id">@item.MASANPHAM</td>
+                    <td>@item.TENSANPHAM</td>
+                    <td class="product-price">@String.Format("{0:N0} ₫", item.DONGIA)</td>
+                    <td>@String.Format("{0:N0}", item.SOLUONG)</td>
+                    <td>
+                        <img src="@Url.Content("~/Content/images/" + (item.HINHANH ?? "no-image.png"))"
+                             alt="@item.TENSANPHAM"
+                             class="product-image" />
+                    </td>
+                    <td class="actions">
+                        @Html.ActionLink("Xem", "Details", new { id = item.MASANPHAM }, new { @class = "action-btn btn-details" })
+                        @Html.ActionLink("Sửa", "Edit", new { id = item.MASANPHAM }, new { @class = "action-btn btn-edit" })
+
+                        @using (Html.BeginForm("Delete", "QuanLySanPham", new { id = item.MASANPHAM }, FormMethod.Post, new { onsubmit = "return confirm('Bạn có chắc muốn xóa sản phẩm này không?');", @class = "delete-form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="action-btn btn-delete">Xóa</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            let input = document.getElementById("searchBox");
+            let filter = input.value.toLowerCase();
+            let rows = document.querySelectorAll("#productTable tbody tr");
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
+            });
+        }
+    </script>
+}
