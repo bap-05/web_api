@@ -22,6 +22,8 @@ namespace QLBH_API.Data
         // THÊM PHƯƠNG THỨC NÀY
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<tbChiTietHoaDon>()
+                .HasKey(c => new { c.MAHOADON, c.MASANPHAM });
             // Báo cho EF Core biết CartItemDetail không phải là một bảng
             modelBuilder.Entity<CartItemDetail>().HasNoKey();
         }

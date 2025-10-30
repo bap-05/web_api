@@ -7,14 +7,8 @@ namespace QLBH_API.Models
     [Table("tbCHITIETHOADON")]
     public class tbChiTietHoaDon
     {
-        [Key]
-        [Column(Order = 0)]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+      
         public int MAHOADON { get; set; }
-
-        [Key]
-        [Column(Order = 1)]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int MASANPHAM { get; set; }
 
         public int? SOLUONG { get; set; }
