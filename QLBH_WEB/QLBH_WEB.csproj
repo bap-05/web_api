@@ -280,6 +280,7 @@
     <Content Include="Views\Cart\Index.cshtml" />
     <Content Include="Views\Cart\_ShoppingCartWidget.cshtml" />
     <Content Include="Views\Cart\Checkout.cshtml" />
+    <Content Include="Views\Cart\OrderSuccess.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

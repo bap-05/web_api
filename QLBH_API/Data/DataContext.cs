@@ -13,8 +13,7 @@ namespace QLBH_API.Data
         public DbSet<tbDanhMuc> tbDANHMUC { get; set; }
         public DbSet<tbSanPham> tbSANPHAM { get; set; }
         public DbSet<tbGioHang> tbGIOHANG { get; set; }
-        public DbSet<tbKhachHang> tbKHACHHANG { get; set; }
-        public DbSet<tbNhanVien> tbNHANVIEN { get; set; }
+    
         public DbSet<tbHoaDon> tbHOADON { get; set; }
         public DbSet<tbChiTietHoaDon> tbCHITIETHOADON { get; set; }
         public DbSet<CartItemDetail> CartItemDetails { get; set; }

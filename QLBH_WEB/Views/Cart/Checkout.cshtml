@@ -6,16 +6,61 @@
 }
 
 <style>
-    /* Bạn có thể thêm CSS tùy chỉnh cho trang checkout tại đây */
-    .checkout-container { max-width: 960px; margin: auto; display: flex; }
-    .customer-info { flex: 1; padding-right: 20px; }
-    .order-summary { flex: 1; padding-left: 20px; border-left: 1px solid #ddd; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
-    .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .summary-total { font-size: 1.2em; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; }
-    .btn-submit-order { background-color: #28a745; color: white; padding: 12px 20px; border: none; cursor: pointer; font-size: 16px; }
+    /* CSS cho trang checkout (giữ nguyên) */
+    .checkout-container {
+        max-width: 960px;
+        margin: auto;
+        display: flex;
+    }
+
+    .customer-info {
+        flex: 1;
+        padding-right: 20px;
+    }
+
+    .order-summary {
+        flex: 1;
+        padding-left: 20px;
+        border-left: 1px solid #ddd;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .summary-total {
+        font-size: 1.2em;
+        font-weight: bold;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+    }
+
+    .btn-submit-order {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+    }
 </style>
 
 <h2>@ViewBag.Title</h2>
@@ -27,7 +72,7 @@
 
         <div class="customer-info">
             <h3>Thông tin giao hàng</h3>
-            
+
             <div class="form-group">
                 @Html.LabelFor(m => m.HoTen, "Họ và Tên")
                 @Html.TextBoxFor(m => m.HoTen, new { @class = "form-control", required = "required" })
@@ -44,7 +89,7 @@
                 @Html.LabelFor(m => m.DiaChiGiaoHang, "Địa chỉ giao hàng")
                 @Html.TextBoxFor(m => m.DiaChiGiaoHang, new { @class = "form-control", required = "required" })
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 @Html.LabelFor(m => m.GhiChu, "Ghi chú (tùy chọn)")
                 @Html.TextAreaFor(m => m.GhiChu, new { @class = "form-control", rows = 3 })
             </div>
@@ -52,10 +97,12 @@
 
         <div class="order-summary">
             <h3>Đơn hàng của bạn</h3>
+
+            @* SỬA LẠI: Lặp qua .Values của Dictionary *@
             @foreach (var item in Model.Cart.Items.Values)
             {
                 <div class="summary-item">
-                    <span>@item.SanPham (x @item.SoLuong)</span>
+                    <span>@item.SanPham.TENSANPHAM (x @item.SoLuong)</span>
                     <strong>@string.Format("{0:N0}", item.ThanhTien) đ</strong>
                 </div>
             }

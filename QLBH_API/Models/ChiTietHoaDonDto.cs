@@ -1,6 +1,6 @@
 ﻿namespace QLBH_API.Models
 {
-    public class ChiTietHoaDonDto
+    public class ChiTietDonHangDto
     {
         public int MaSanPham { get; set; }
         public int SoLuong { get; set; }

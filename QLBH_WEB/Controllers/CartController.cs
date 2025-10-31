@@ -1,4 +1,4 @@
-﻿using QLBH_WEB.Models; // Đảm bảo namespace này là đúng
+﻿using QLBH_WEB.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,60 +13,59 @@ namespace QLBH_WEB.Controllers
     public class CartController : Controller
     {
         private readonly string _apiBaseUrl = ConfigurationManager.AppSettings["ApiBaseUrl"];
-        private const string CartSession = "CartSession"; // Tên của key lưu trong Session
+        private const string CartSession = "CartSession";
+        private const string CheckoutCartSession = "CheckoutCartSession";
 
         private HttpClient GetHttpClient()
         {
-            var client = new HttpClient { BaseAddress = new System.Uri(_apiBaseUrl) };
+            var client = new HttpClient { BaseAddress = new Uri(_apiBaseUrl) };
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             return client;
         }
 
-        // GET: /Cart/Index
-        // Hiển thị trang giỏ hàng từ dữ liệu trong Session
+        // -------------------------------
+        // 🛒 HIỂN THỊ GIỎ HÀNG
+        // -------------------------------
         public ActionResult Index()
         {
-            var cart = Session[CartSession] as Cart;
-            if (cart == null)
-            {
-                cart = new Cart(); // Nếu chưa có giỏ hàng, tạo mới
-            }
+            var cart = Session[CartSession] as Cart ?? new Cart();
+            ViewBag.SuccessMessage = TempData["SuccessMessage"];
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
             return View(cart);
         }
 
-        // POST: /Cart/AddToCart
-        // Thêm sản phẩm vào giỏ hàng và lưu vào Session
+        // -------------------------------
+        // ➕ THÊM SẢN PHẨM VÀO GIỎ
+        // -------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddToCart(int id, int soLuong = 1)
         {
             SanPhamViewModel sanPham;
 
-            // Luôn lấy thông tin sản phẩm mới nhất từ API để đảm bảo đúng giá
             using (var client = GetHttpClient())
             {
                 HttpResponseMessage result = await client.GetAsync($"api/SanPham/{id}");
-                if (result.IsSuccessStatusCode)
-                {
-                    sanPham = await result.Content.ReadAsAsync<SanPhamViewModel>();
-                }
-                else
+                if (!result.IsSuccessStatusCode)
                 {
                     TempData["CartError"] = "Không tìm thấy sản phẩm để thêm vào giỏ.";
-                    return Redirect(Request.UrlReferrer.ToString());
+                    return RedirectToAction("Index");
                 }
+
+                sanPham = await result.Content.ReadAsAsync<SanPhamViewModel>();
             }
 
-           
             var cart = Session[CartSession] as Cart ?? new Cart();
-
-            // thêm sản phẩm vào đối tượng giỏ hàng trong bộ nhớ
             cart.AddItem(sanPham, soLuong);
             Session[CartSession] = cart;
+
+            TempData["CartSuccess"] = $"Đã thêm {sanPham.TENSANPHAM} vào giỏ hàng!";
             return RedirectToAction("Index");
         }
 
-        // POST: /Cart/UpdateCart
-        // Cập nhật số lượng các sản phẩm trong giỏ hàng trong Session
+        // -------------------------------
+        // 🔁 CẬP NHẬT GIỎ HÀNG
+        // -------------------------------
         [HttpPost]
         public ActionResult UpdateCart(FormCollection form)
         {
@@ -82,127 +81,152 @@ namespace QLBH_WEB.Controllers
                         cart.UpdateItem(maSP, soLuong);
                     }
                 }
-                Session[CartSession] = cart; // Lưu lại thay đổi vào Session
+                Session[CartSession] = cart;
+                TempData["CartSuccess"] = "Đã cập nhật giỏ hàng.";
             }
             return RedirectToAction("Index");
         }
 
-        // GET: /Cart/RemoveFromCart/5
-        // Xóa một sản phẩm khỏi giỏ hàng trong Session
+        // -------------------------------
+        // ❌ XÓA SẢN PHẨM KHỎI GIỎ
+        // -------------------------------
         public ActionResult RemoveFromCart(int id)
         {
             var cart = Session[CartSession] as Cart;
-            if (cart != null)
-            {
-                cart.RemoveItem(id);
-                Session[CartSession] = cart; // Lưu lại thay đổi vào Session
-            }
+            cart?.RemoveItem(id);
+            Session[CartSession] = cart;
             return RedirectToAction("Index");
         }
 
-        // Child Action để hiển thị widget giỏ hàng trên mọi trang
-        [ChildActionOnly]
-        public ActionResult ShoppingCartWidget()
+        // -------------------------------
+        // 🧾 CHUẨN BỊ THANH TOÁN
+        // -------------------------------
+        [HttpPost]
+        public ActionResult PrepareCheckout(int[] selectedItems)
         {
-            var cart = Session[CartSession] as Cart ?? new Cart();
-            return PartialView("_ShoppingCartWidget", cart);
-        }
-        public ActionResult Checkout()
-        {
-            Cart cart = (Cart)Session["Cart"];
-            if (cart == null || cart.Items.Count == 0)
+            var cart = Session[CartSession] as Cart;
+            if (cart == null || selectedItems == null || selectedItems.Length == 0)
             {
-                return RedirectToAction("Index", "Home");
+                TempData["CartError"] = "Vui lòng chọn sản phẩm để thanh toán.";
+                return RedirectToAction("Index");
             }
 
-            var model = new CheckoutViewModel
+            var checkoutCart = new Cart();
+            foreach (var id in selectedItems)
             {
-                Cart = cart
-            };
+                if (cart.Items.ContainsKey(id))
+                {
+                    var item = cart.Items[id];
+                    checkoutCart.AddItem(item.SanPham, item.SoLuong);
+                }
+            }
 
-            return View(model); // Trả về View Checkout.cshtml
+            Session[CheckoutCartSession] = checkoutCart;
+            return RedirectToAction("Checkout");
         }
 
-        // POST: /Cart/SubmitCheckout
+        // -------------------------------
+        // 💳 TRANG THANH TOÁN
+        // -------------------------------
+        public ActionResult Checkout()
+        {
+            if (Session["MaKhachHang"] == null)
+                Session["MaKhachHang"] = 1; // test tạm
+
+            var cart = Session[CheckoutCartSession] as Cart;
+            if (cart == null || cart.Items.Count == 0)
+            {
+                TempData["CartError"] = "Không có sản phẩm nào để thanh toán.";
+                return RedirectToAction("Index");
+            }
+
+            var model = new CheckoutViewModel { Cart = cart };
+            return View(model);
+        }
+
+        // -------------------------------
+        // ✅ GỬI ĐƠN HÀNG (SUBMIT)
+        // -------------------------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> SubmitCheckout(CheckoutViewModel model)
         {
-            Cart cart = (Cart)Session["Cart"];
-            if (cart == null)
+            if (Session["MaKhachHang"] == null)
+                Session["MaKhachHang"] = 1; // test tạm
+
+            int maKhachHang = Convert.ToInt32(Session["MaKhachHang"]);
+            var cart = Session[CheckoutCartSession] as Cart;
+
+            if (cart == null || cart.Items.Count == 0)
             {
-                // Xử lý lỗi giỏ hàng trống
+                TempData["CartError"] = "Giỏ hàng trống.";
                 return RedirectToAction("Index");
             }
 
             if (!ModelState.IsValid)
             {
                 model.Cart = cart;
-                return View("Checkout", model); // Trả lại trang checkout nếu nhập liệu lỗi
+                return View("Checkout", model);
             }
 
-            // 1. Chuẩn bị dữ liệu DTO để gửi
-            var dto = new HoaDonCreateDto
+            // Chuẩn bị dữ liệu gửi API
+            var hoaDonDto = new HoaDonCreateDto
             {
-                // Cần có logic lấy MaKhachHang (ví dụ: sau khi đăng nhập)
-                // Tạm thời hardcode
-                MaKhachHang = 1,
-                DiaChiGiaoHang = model.DiaChiGiaoHang,
-                GhiChu = model.GhiChu,
+                MaKhachHang = maKhachHang,
+            
                 TongTien = cart.GetTotal(),
-                ChiTietDonHang = new List<ChiTietHoaDonDto>()
+                ChiTietHoaDon = cart.Items.Values.Select(item => new ChiTietHoaDonDto
+                {
+                    MaSanPham = item.SanPham.MASANPHAM,
+                    SoLuong = item.SoLuong,
+                    DonGia = item.SanPham.DONGIA ?? 0
+                }).ToList()
             };
 
-            foreach (var item in cart.Items)
-            {
-                dto.ChiTietDonHang.Add(new ChiTietHoaDonDto
+            
+                using (var client = GetHttpClient())
                 {
-                    MaSanPham = item.Value.SanPham.MASANPHAM, // <-- Sửa lại
-                    SoLuong = item.Value.SoLuong,     // <-- Sửa lại
-                    DonGia = item.Value.SanPham.DONGIA ?? 0
-                });
-            }
-
-            // 2. Gọi API để tạo hóa đơn
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri(_apiBaseUrl);
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    HttpResponseMessage response = await client.PostAsJsonAsync("api/hoadon/create", dto);
+                    var response = await client.PostAsJsonAsync("api/HoaDon/Create", hoaDonDto);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        // Xóa giỏ hàng khỏi session
-                        Session["Cart"] = null;
+                        // Xóa các sản phẩm vừa thanh toán khỏi giỏ chính
+                        var fullCart = Session[CartSession] as Cart;
+                        foreach (var key in cart.Items.Keys)
+                            fullCart?.RemoveItem(key);
 
-                        // Chuyển đến trang cảm ơn
-                        return RedirectToAction("OrderSuccess");
+                        Session[CartSession] = fullCart;
+                        Session[CheckoutCartSession] = null;
+
+                        TempData["SuccessMessage"] = "Đặt hàng thành công!";
+                        return RedirectToAction("Index", "Cart");
                     }
                     else
                     {
-                        // Xử lý lỗi từ API
-                        ModelState.AddModelError("", "Không thể tạo đơn hàng. Vui lòng thử lại. " + response.ReasonPhrase);
-                        model.Cart = cart;
-                        return View("Checkout", model);
+                        ModelState.AddModelError("", $"Không thể tạo đơn hàng: {response.ReasonPhrase}");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Đã xảy ra lỗi: " + ex.Message);
-                model.Cart = cart;
-                return View("Checkout", model);
-            }
+           
+            model.Cart = cart;
+            return View("Checkout", model);
         }
 
-        // GET: /Cart/OrderSuccess
+        // -------------------------------
+        // 🎉 TRANG SAU KHI ĐẶT HÀNG THÀNH CÔNG
+        // -------------------------------
         public ActionResult OrderSuccess()
         {
-            return Content("Chúc mừng! Bạn đã đặt hàng thành công.");
+            return View();
+        }
+
+        // -------------------------------
+        // 🧩 HIỂN THỊ MINI-CART (nếu cần)
+        // -------------------------------
+        [ChildActionOnly]
+        public ActionResult ShoppingCartWidget()
+        {
+            var cart = Session[CartSession] as Cart ?? new Cart();
+            return PartialView("_ShoppingCartWidget", cart);
         }
     }
 }

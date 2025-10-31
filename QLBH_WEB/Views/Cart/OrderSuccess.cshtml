@@ -1,0 +1,11 @@
+﻿@{
+    ViewBag.Title = "Đặt hàng thành công";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="text-align:center; padding:40px;">
+    <h2>🎉 Cảm ơn bạn đã đặt hàng!</h2>
+    <p>Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất có thể.</p>
+    <br />
+    @Html.ActionLink("Tiếp tục mua sắm", "Index", "Home", null, new { @class = "btn btn-success" })
+</div>

@@ -97,7 +97,7 @@
   {
     "ContainingType": "HoaDonController",
     "Method": "CreateHoaDon",
-    "RelativePath": "api/HoaDon/create",
+    "RelativePath": "api/HoaDon/Create",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

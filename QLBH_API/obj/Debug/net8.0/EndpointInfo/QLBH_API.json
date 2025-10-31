@@ -155,7 +155,7 @@
         }
       }
     },
-    "/api/HoaDon/create": {
+    "/api/HoaDon/Create": {
       "post": {
         "tags": [
           "HoaDon"
@@ -337,7 +337,7 @@
   },
   "components": {
     "schemas": {
-      "ChiTietHoaDonDto": {
+      "ChiTietDonHangDto": {
         "type": "object",
         "properties": {
           "maSanPham": {
@@ -362,22 +362,14 @@
             "type": "integer",
             "format": "int32"
           },
-          "diaChiGiaoHang": {
-            "type": "string",
-            "nullable": true
-          },
-          "ghiChu": {
-            "type": "string",
-            "nullable": true
-          },
           "tongTien": {
             "type": "number",
             "format": "double"
           },
-          "chiTietDonHang": {
+          "chiTietHoaDon": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ChiTietHoaDonDto"
+              "$ref": "#/components/schemas/ChiTietDonHangDto"
             },
             "nullable": true
           }
